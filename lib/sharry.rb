@@ -1,7 +1,7 @@
-require 'sharry/server'
-require 'sharry/config'
-require 'sharry/device'
+require "sharry/server"
+require "sharry/config"
+require "sharry/device"
 
-require 'sharry/version'
+require "sharry/version"
 
 puts "Running 'Sharry, please!' -- Version: #{Sharry::VERSION}"

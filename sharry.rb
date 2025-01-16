@@ -1,28 +1,32 @@
-require 'sinatra'
-require 'socket'
+require "sinatra"
+require "socket"
 
-WHITELIST = ['127.0.0.1']
+WHITELIST = ["127.0.0.1"]
 PENDING = []
-set :bind, '0.0.0.0'
+set :bind, "0.0.0.0"
 set :port, 8080
 
 puts Socket.ip_address_list.detect(&:ipv4_private?).ip_address
 
 def host_request?(request)
-  request.ip == '127.0.0.1' || request.ip == Socket.ip_address_list.detect(&:ipv4_private?).ip_address
+  request.ip == "127.0.0.1" || request.ip == Socket.ip_address_list.detect(&:ipv4_private?).ip_address
 end
 
 def get_device_name(ip)
   begin
-    Socket.gethostbyaddr(ip.split('.').map(&:to_i).pack('C*')).first
+    Socket.gethostbyaddr(ip.split(".").map(&:to_i).pack("C*")).first
   rescue SocketError
     nil
   end
 end
 
-get '/' do
+get "/" do
   if WHITELIST.include?(request.ip)
-    "Welcome! You have access to the index."
+    <<-HTML
+    <ul>
+      #{Dir.entries(Dir.pwd).map { |file| "<li>#{file}</li>" }}
+    </ul>
+  HTML
   else
     unless PENDING.include?(request.ip)
       PENDING << request.ip
@@ -31,7 +35,7 @@ get '/' do
   end
 end
 
-get '/admin' do
+get "/admin" do
   halt 403, "Access forbidden: Admin only." unless host_request?(request)
   <<-HTML
     <h3>Admin Panel</h3>
@@ -51,10 +55,10 @@ get '/admin' do
   HTML
 end
 
-get '/admin/accept' do
+get "/admin/accept" do
   halt 403, "Access forbidden: Admin only." unless host_request?(request)
 
-  ip_to_accept = params['ip']
+  ip_to_accept = params["ip"]
   if PENDING.include?(ip_to_accept)
     PENDING.delete(ip_to_accept)
     WHITELIST << ip_to_accept unless WHITELIST.include?(ip_to_accept)

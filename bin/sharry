@@ -8,6 +8,9 @@ require 'launchy'
 
 host = Sharry::Config.get(:host)
 port = Sharry::Config.get(:port)
+own_ip = Sharry::Device.own_ip
+url = "http://#{own_ip}:#{port}"
+admin_url = "#{url}/admin"
 
 Sharry::Server.kill_existing_server(host, port)
 
@@ -15,6 +18,6 @@ server_thread = Thread.new {Sharry::Server.start!}
 
 Sharry::Server.wait_for_server(host, port)
 
-Launchy.open("http://#{host}:#{port}")
+Launchy.open(admin_url)
 
 server_thread.join

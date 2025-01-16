@@ -1,18 +1,20 @@
-require 'sinatra/base'
-require 'socket'
-require_relative 'config'
+require "sinatra/base"
+require "socket"
+require_relative "config"
+require_relative "device"
 
 module Sharry
   class Server < Sinatra::Base
     @host = Sharry::Config.get(:host)
     @port = Sharry::Config.get(:port)
 
-    WHITELIST = ['127.0.0.1']
+    WHITELIST = ["127.0.0.1", Sharry::Device.own_ip]
     PENDING = []
 
     set :bind, @host
     set :port, @port
     set :root, Dir.pwd
+    set :public_folder, Dir.pwd
 
     # in the current implementation this method must be called outside of this class
     # before calling 'start!' -method for the server
@@ -46,9 +48,19 @@ module Sharry
       end
     end
 
-    get '/' do
+    get "/" do
       if WHITELIST.include?(request.ip)
-        "Welcome! You have access to the index."
+        <<-HTML
+        <h2>#{File.basename(Dir.getwd)}</h2>
+        <a href="/admin">go to admin panel</a>
+        <hr>
+        <ul>
+          #{Dir.entries(Dir.pwd)
+            .reject { |file| file.start_with?(".") || !File.file?(File.join(Dir.pwd, file)) }
+            .map { |file| "<li><a href='/#{file}'>#{file}</a></li>" }
+            .join("\n")}
+        </ul>
+      HTML
       else
         unless PENDING.include?(request.ip)
           PENDING << request.ip
@@ -57,10 +69,11 @@ module Sharry
       end
     end
 
-    get '/admin' do
+    get "/admin" do
       halt 403, "Access forbidden: Admin only." unless Sharry::Device.host_request?(request)
       <<-HTML
         <h3>Admin Panel</h3>
+        <a href='/'>go to folder</a>
         <hr>
         <p>Refresh the page to update pending requests</p>
         <h4>Pending Requests</h4>
@@ -77,10 +90,10 @@ module Sharry
       HTML
     end
 
-    get '/admin/accept' do
+    get "/admin/accept" do
       halt 403, "Access forbidden: Admin only." unless Sharry::Device.host_request?(request)
-    
-      ip_to_accept = params['ip']
+
+      ip_to_accept = params["ip"]
       if PENDING.include?(ip_to_accept)
         PENDING.delete(ip_to_accept)
         WHITELIST << ip_to_accept unless WHITELIST.include?(ip_to_accept)
@@ -89,6 +102,5 @@ module Sharry
         "IP #{ip_to_accept} is not in the pending list. <a href='/admin'>Back to Admin</a>"
       end
     end
-
   end
 end
