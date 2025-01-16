@@ -1,10 +1,14 @@
 require 'sinatra/base'
 require 'socket'
+require_relative 'config'
 
 module Sharry
   class Server < Sinatra::Base
-    set :bind, '0.0.0.0'
-    set :port, 8080
+    @host = Sharry::Config.get(:host)
+    @port = Sharry::Config.get(:port)
+
+    set :bind, @host
+    set :port, @port
     set :root, Dir.pwd
 
     # in the current implementation this method must be called outside of this class

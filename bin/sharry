@@ -4,7 +4,17 @@
 $LOAD_PATH.unshift File.dirname(__FILE__) + '/../lib'
 
 require 'sharry'
+require 'launchy'
 
-puts Sharry::Server.methods
-Sharry::Server.kill_existing_server('0.0.0.0', 8080)
-Sharry::Server.start!
+host = Sharry::Config.get(:host)
+port = Sharry::Config.get(:port)
+
+Sharry::Server.kill_existing_server(host, port)
+
+server_thread = Thread.new {Sharry::Server.start!}
+
+Sharry::Server.wait_for_server(host, port)
+
+Launchy.open("http://#{host}:#{port}")
+
+server_thread.join
