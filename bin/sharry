@@ -1,0 +1,10 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+$LOAD_PATH.unshift File.dirname(__FILE__) + '/../lib'
+
+require 'sharry'
+
+puts Sharry::Server.methods
+Sharry::Server.kill_existing_server('0.0.0.0', 8080)
+Sharry::Server.start!
