@@ -1,6 +1,7 @@
 require 'sharry/server'
 require 'sharry/config'
+require 'sharry/device'
 
 require 'sharry/version'
 
-puts "start!"
+puts "Running 'Sharry, please!' -- Version: #{Sharry::VERSION}"
