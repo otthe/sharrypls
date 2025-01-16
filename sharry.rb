@@ -3,6 +3,8 @@ require 'socket'
 
 WHITELIST = ['127.0.0.1']
 PENDING = []
+set :bind, '0.0.0.0'
+set :port, 8080
 
 puts Socket.ip_address_list.detect(&:ipv4_private?).ip_address
 
@@ -17,9 +19,6 @@ def get_device_name(ip)
     nil
   end
 end
-
-set :bind, '0.0.0.0'
-set :port, 8080
 
 get '/' do
   if WHITELIST.include?(request.ip)

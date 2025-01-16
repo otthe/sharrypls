@@ -1,25 +1,7 @@
 
-
-sudo apt install avahi-daemon avahi-utils
-
-sudo systemctl start avahi-daemon
-sudo systemctl enable avahi-daemon
-
-
-sudo apt install libavahi-compat-libdnssd
-
-
-
-cat /etc/nsswitch.conf
-
-Look for a line like this:
-hosts: files mdns4_minimal [NOTFOUND=return] dns mdns4
-
-
-If mdns4_minimal or mdns4 is missing, update the file:
-sudo nano /etc/nsswitch.conf
-
-Add or modify the line to:
-hosts: files mdns4_minimal [NOTFOUND=return] dns mdns4
-
-
+## Get started
+1. Run the app on CLI inside the folder you want to share
+2. Go to index page of ip:host on the device you want to access the folder with to send a whitelisting request
+3. Goto /admin page on your sharing device to see all the pending whitelisting requests
+4. Accept the request for your other device (you only need to do this once)
+5. Refresh the index page to see contents of the folder
