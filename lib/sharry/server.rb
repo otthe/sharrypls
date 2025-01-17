@@ -52,7 +52,12 @@ module Sharry
       if WHITELIST.include?(request.ip)
         <<-HTML
         <h2>#{File.basename(Dir.getwd)}</h2>
-        <a href="/admin">go to admin panel</a>
+        <hr>
+        <form action="/upload" method="post" enctype="multipart/form-data">
+          <label for="file">Choose a file to upload:</label>
+          <input type="file" name="file" id="file">
+          <button type="submit">Upload</button>
+        </form>
         <hr>
         <ul>
           #{Dir.entries(Dir.pwd)
@@ -60,6 +65,7 @@ module Sharry
             .map { |file| "<li><a href='/#{file}'>#{file}</a></li>" }
             .join("\n")}
         </ul>
+        <a href="/admin">go to admin panel</a>   
       HTML
       else
         unless PENDING.include?(request.ip)
@@ -100,6 +106,23 @@ module Sharry
         "IP #{ip_to_accept} has been whitelisted. <a href='/admin'>Back to Admin</a>"
       else
         "IP #{ip_to_accept} is not in the pending list. <a href='/admin'>Back to Admin</a>"
+      end
+    end
+
+    post '/upload' do
+      if params[:file] && params[:file][:tempfile]
+        filename = params[:file][:filename]
+        tempfile = params[:file][:tempfile]
+
+        upload_path = File.join(settings.root, filename)
+
+        File.open(upload_path, 'wb') do |file|
+          file.write(tempfile.read)
+        end
+
+        redirect "/"
+      else
+        "No file selected for upload"
       end
     end
   end
